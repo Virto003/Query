@@ -1,0 +1,42 @@
+let
+    // Carregar a tabela principal
+    Fonte = Excel.CurrentWorkbook(){[Name="Tabela1"]}[Content],
+    #"Cabeçalhos rebaixados" = Table.DemoteHeaders(Fonte),
+    #"Linhas Inferiores Removidas1" = Table.RemoveLastN(#"Cabeçalhos rebaixados",1),
+    #"Colunas Removidas" = Table.RemoveColumns(#"Linhas Inferiores Removidas1",{"Column1", "Column2", "Column3", "Column4", "Column5"}),  
+    #"Tabela Transposta" = Table.Transpose(#"Colunas Removidas"),
+    #"Valor Substituído" = Table.TransformColumns(#"Tabela Transposta", {{"Column1", each if Text.StartsWith(_, "Coluna") then null else _, type text}}),
+    #"Linhas Filtradas" = Table.SelectRows(#"Valor Substituído", each ([Column2] <> null)),
+    #"Preenchido Abaixo" = Table.FillDown(#"Linhas Filtradas",{"Column1"}),
+    // Agrupar por fornecedor e transpor os dados
+    #"Linhas Agrupadas" = Table.Group(
+        #"Preenchido Abaixo",
+        {"Column1"},
+        {
+            {"Contagem", each 
+                Table.PromoteHeaders(
+                    Table.Transpose(
+                        Table.RemoveColumns(_, {"Column1"})
+                    ),
+                    [PromoteAllScalars=true]
+                ), 
+                type table
+            }
+        }
+    ),
+    #"Contagem Expandido" = Table.ExpandTableColumn(#"Linhas Agrupadas", "Contagem", {"Preço", "Quantidade", "UM", "Preço estendido", "Economia", "Custo Total", "Período de Fornecimento", "Origem/Produtor", "Percentagem de desconto", "Embalagem Retornável (SIM/NÃO)", "Notas", "Categoria do item", "Código do material", "Número do material", "Grupo de materiais", "Centro", "Incoterm", "Caso pretenda outro, indique qual.", "Tipo do material", "Order Unit"}),
+    #"Colunas Renomeadas" = Table.RenameColumns(#"Contagem Expandido",{{"Column1", "Fornecedor"}}),
+
+    // Carregar a tabela de itens
+    FonteItens = Excel.CurrentWorkbook(){[Name="Tabela1"]}[Content],
+    #"Tipo Alterado" = Table.TransformColumnTypes(FonteItens,{{"Número", Int64.Type}, {"Nome do item", type text}, {"Quantidade", Int64.Type}, {"UM", type text}, {"Coluna13", type text}}),
+    #"Outras Colunas Removidas" = Table.SelectColumns(#"Tipo Alterado",{"Número", "Nome do item", "Coluna13"}),
+    // Limpar a tabela de itens
+    #"Linhas Superiores Removidas" = Table.Skip(#"Outras Colunas Removidas",1),
+    #"Linhas Inferiores Removidas" = Table.RemoveLastN(#"Linhas Superiores Removidas",1),
+
+    // Mesclar com a tabela principal
+    #"Consultas Mescladas" = Table.NestedJoin(#"Colunas Renomeadas", {"Código do material"}, #"Linhas Inferiores Removidas", {"Coluna13"}, "Itens", JoinKind.LeftOuter),
+    #"Itens Expandido" = Table.ExpandTableColumn(#"Consultas Mescladas", "Itens", {"Número", "Nome do item"}, {"Número", "Nome do item"})
+in
+    #"Itens Expandido"

@@ -1,0 +1,7 @@
+let
+    Fonte = Excel.CurrentWorkbook(){[Name="Table"]}[Content],
+    #"Personalização Adicionada" = Table.AddColumn(Fonte, "Personalizar", each Excel.CurrentWorkbook(){[Name="Tabela224"]}[Content]),
+    #"Personalizar Expandido" = Table.ExpandTableColumn(#"Personalização Adicionada", "Personalizar", {"Plano", "Valor"}, {"Personalizar.Plano", "Personalizar.Valor"}),
+    #"Cabeçalhos Promovidos" = Table.PromoteHeaders(#"Personalizar Expandido", [PromoteAllScalars=true])
+in
+    #"Cabeçalhos Promovidos"

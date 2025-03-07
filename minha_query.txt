@@ -30,14 +30,16 @@ let
     // Carregar a tabela de itens
     FonteItens = Excel.CurrentWorkbook(){[Name="Tabela1"]}[Content],
     #"Tipo Alterado" = Table.TransformColumnTypes(FonteItens,{{"Número", Int64.Type}, {"Nome do item", type text}, {"Quantidade", Int64.Type}, {"UM", type text}, {"Coluna13", type text}}),
-    #"Outras Colunas Removidas" = Table.SelectColumns(#"Tipo Alterado",{"Número", "Nome do item", "Coluna20"}),
+    #"Cabeçalhos Promovidos" = Table.PromoteHeaders(#"Tipo Alterado", [PromoteAllScalars=true]),
+    #"Colunas Renomeadas1" = Table.RenameColumns(#"Cabeçalhos Promovidos",{{"Column1", "Número"}, {"Column2", "Nome do item"}}),
+    #"Outras Colunas Removidas" = Table.SelectColumns(#"Colunas Renomeadas1",{"Número", "Nome do item", "Número do material"}),
     // Limpar a tabela de itens
     #"Linhas Superiores Removidas" = Table.Skip(#"Outras Colunas Removidas",1),
     #"Linhas Inferiores Removidas" = Table.RemoveLastN(#"Linhas Superiores Removidas",1),
 
     // Mesclar com a tabela principal
-    #"Consultas Mescladas" = Table.NestedJoin(#"Colunas Renomeadas", {"Número do material"}, #"Linhas Inferiores Removidas", {"Coluna20"}, "Itens", JoinKind.LeftOuter),
+    #"Consultas Mescladas" = Table.NestedJoin(#"Colunas Renomeadas", {"Número do material"}, #"Linhas Inferiores Removidas", {"Número do material"}, "Itens", JoinKind.LeftOuter),
     #"Itens Expandido" = Table.ExpandTableColumn(#"Consultas Mescladas", "Itens", {"Número", "Nome do item"}, {"Número", "Nome do item"}),
-    #"Linhas Filtradas1" = Table.SelectRows(#"Itens Expandido", each ([#"Valor impacto/saving"] <> "(Preço Base - Orçamento x quantidade)"))
+    #"Linhas Filtradas1" = Table.SelectRows(#"Itens Expandido", each ([#"Valor impacto/saving"] <> "(Preço Base - Orçamento x quantidade)") and ([Número do material] <> null))
 in
     #"Linhas Filtradas1"

@@ -29,10 +29,11 @@ Table.PromoteHeaders(
     ),
     #"Contagem Expandido1" = Table.ExpandTableColumn(#"Linhas Agrupadas", "Contagem", {"Column2", "Preço base", "Preço estendido", "Custo Total", "Quantidade", "UM", "Percentagem de desconto por Unidade", "Centro", "Embalagem Retornável (SIM/NÃO)", "Notas", "Unidade de venda", "% de diferença savings", "Valor impacto/saving", "Preço orçamento", "Preço última compra", "Custos Adicionais por unidade", "Período de Fornecimento", "Origem/Produtor", "Incoterm", "Caso pretenda outro incoterm, indique qual.", "Categoria do item", "Número do material", "Grupo de materiais", "Tipo do material", "Order Unit"}, {"Column2", "Preço base", "Preço estendido", "Custo Total", "Quantidade", "UM", "Percentagem de desconto por Unidade", "Centro", "Embalagem Retornável (SIM/NÃO)", "Notas", "Unidade de venda", "% de diferença savings", "Valor impacto/saving", "Preço orçamento", "Preço última compra", "Custos Adicionais por unidade", "Período de Fornecimento", "Origem/Produtor", "Incoterm", "Caso pretenda outro incoterm, indique qual.", "Categoria do item", "Número do material", "Grupo de materiais", "Tipo do material", "Order Unit"}),
     #"Colunas Renomeadas" = Table.RenameColumns(#"Contagem Expandido1",{{"Column2", "Número"}, {"Column1", "Fornecedor"}}),
+    #"Linhas Filtradas2" = Table.SelectRows(#"Colunas Renomeadas", each ([Número] <> "Column3")),
+    #"Tipo Alterado" = Table.TransformColumnTypes(#"Linhas Filtradas2",{{"Número", Int64.Type}}),
     // Carregar a tabela de itens
     FonteItens = Excel.CurrentWorkbook(){[Name="Tabela1"]}[Content],
-    #"Tipo Alterado" = Table.TransformColumnTypes(FonteItens,{{"Número", Int64.Type}, {"Nome do item", type text}, {"Quantidade", Int64.Type}, {"UM", type text}, {"Coluna13", type text}}),
-    #"Cabeçalhos Promovidos" = Table.PromoteHeaders(#"Tipo Alterado", [PromoteAllScalars=true]),
+    #"Cabeçalhos Promovidos" = Table.PromoteHeaders(FonteItens, [PromoteAllScalars=true]),
     #"Colunas Renomeadas1" = Table.RenameColumns(#"Cabeçalhos Promovidos",{{"Column1", "Número"}, {"Column2", "Nome do item"}}),
     #"Outras Colunas Removidas" = Table.SelectColumns(#"Colunas Renomeadas1",{"Número", "Nome do item", "Número do material"}),
     // Limpar a tabela de itens
@@ -40,7 +41,7 @@ Table.PromoteHeaders(
     #"Linhas Inferiores Removidas" = Table.RemoveLastN(#"Linhas Superiores Removidas",1),
 
     // Mesclar com a tabela principal
-    #"Consultas Mescladas" = Table.NestedJoin(#"Colunas Renomeadas", {"Número"}, #"Linhas Inferiores Removidas", {"Número"}, "Itens", JoinKind.LeftOuter),
+    #"Consultas Mescladas" = Table.NestedJoin(#"Tipo Alterado", {"Número"}, #"Linhas Inferiores Removidas", {"Número"}, "Itens", JoinKind.LeftOuter),
     #"Itens Expandido" = Table.ExpandTableColumn(#"Consultas Mescladas", "Itens", {"Nome do item"}, {"Nome do item"}),
     #"Linhas Filtradas1" = Table.SelectRows(#"Itens Expandido", each ([#"Valor impacto/saving"] <> "(Preço Base - Orçamento x quantidade)") and ([Número do material] <> null)),
     #"Linhas Classificadas" = Table.Sort(#"Linhas Filtradas1",{{"Fornecedor", Order.Ascending}})

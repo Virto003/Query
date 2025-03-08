@@ -1,6 +1,11 @@
 let
     Fonte = Excel.CurrentWorkbook(){[Name="Table"]}[Content],
-    #"Personalização Adicionada" = Table.AddColumn(Fonte, "Personalizar", each Excel.CurrentWorkbook(){[Name="TabelaPlanos"]}[Content]),
-    #"Personalizar Expandido" = Table.ExpandTableColumn(#"Personalização Adicionada", "Personalizar", {"Plano", "Valor"}, {"Plano", "Valor"})
+
+    FontePlanos = Excel.CurrentWorkbook(){[Name="TabelaPlanos"]}[Content],
+    #"Outras Colunas Não Dinâmicas" = Table.UnpivotOtherColumns(FontePlanos, {"Item"}, "Atributo", "Valor"),
+    #"Colunas Renomeadas" = Table.RenameColumns(#"Outras Colunas Não Dinâmicas",{{"Atributo", "Orçamento"}}),
+
+    #"Consultas Mescladas" = Table.NestedJoin(Fonte, {"Nome do item"}, #"Colunas Renomeadas", {"Item"}, "Itens", JoinKind.LeftOuter),
+    #"Itens Expandido" = Table.ExpandTableColumn(#"Consultas Mescladas", "Itens", {"Orçamento", "Valor"}, {"Orçamento", "Valor"})
 in
-    #"Personalizar Expandido"
+    #"Itens Expandido"

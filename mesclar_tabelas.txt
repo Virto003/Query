@@ -2,10 +2,10 @@ let
     Fonte = Excel.CurrentWorkbook(){[Name="Table"]}[Content],
 
     FontePlanos = Excel.CurrentWorkbook(){[Name="TabelaPlanos"]}[Content],
-    #"Outras Colunas Não Dinâmicas" = Table.UnpivotOtherColumns(FontePlanos, {"Item"}, "Atributo", "Valor"),
-    #"Colunas Renomeadas" = Table.RenameColumns(#"Outras Colunas Não Dinâmicas",{{"Atributo", "Orçamento"}}),
+    #"Outras Colunas Não Dinâmicas" = Table.UnpivotOtherColumns(FontePlanos, {"Nome do Item"}, "Atributo", "Valor"),
+    #"Colunas Renomeadas" = Table.RenameColumns(#"Outras Colunas Não Dinâmicas",{{"Atributo", "Orçamento"}, {"Nome do Item", "Nome do item"}}),
 
-    #"Consultas Mescladas" = Table.NestedJoin(Fonte, {"Nome do item"}, #"Colunas Renomeadas", {"Item"}, "Itens", JoinKind.LeftOuter),
+    #"Consultas Mescladas" = Table.NestedJoin(Fonte, {"Nome do item"}, #"Colunas Renomeadas", {"Nome do item"}, "Itens", JoinKind.LeftOuter),
     #"Itens Expandido" = Table.ExpandTableColumn(#"Consultas Mescladas", "Itens", {"Orçamento", "Valor"}, {"Orçamento", "Valor"})
 in
     #"Itens Expandido"

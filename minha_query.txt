@@ -37,7 +37,8 @@ Table.PromoteHeaders(
     #"Outras Colunas Removidas" = Table.SelectColumns(#"Cabeçalhos Promovidos",{"", "_1", "Número do material"}),
     #"Colunas Renomeadas3" = Table.RenameColumns(#"Outras Colunas Removidas",{{"", "Número"}, {"_1", "Nome do item"}}),
     #"Linhas Filtradas3" = Table.SelectRows(#"Colunas Renomeadas3", each [Número do material] <> null),
-    #"Tipo Alterado1" = Table.TransformColumnTypes(#"Linhas Filtradas3",{{"Número", type number}}),
+    #"Duplicatas Removidas" = Table.Distinct(#"Linhas Filtradas3", {"Número do material"}),
+    #"Tipo Alterado1" = Table.TransformColumnTypes(#"Duplicatas Removidas",{{"Número", type number}}),
 
     // Mesclar com a tabela principal
     #"Consultas Mescladas" = Table.NestedJoin(#"Linhas Filtradas2", {"Número do material"}, #"Tipo Alterado1", {"Número do material"}, "Itens", JoinKind.LeftOuter),

@@ -44,6 +44,7 @@ Table.PromoteHeaders(
     #"Consultas Mescladas" = Table.NestedJoin(#"Linhas Filtradas2", {"Número do material"}, #"Tipo Alterado1", {"Número do material"}, "Itens", JoinKind.LeftOuter),
     #"Itens Expandido" = Table.ExpandTableColumn(#"Consultas Mescladas", "Itens", {"Nome do item"}, {"Nome do item"}),
     #"Linhas Filtradas1" = Table.SelectRows(#"Itens Expandido", each ([#"Valor impacto/saving"] <> "(Preço Base - Orçamento x quantidade)") and ([Número do material] <> null)),
-    #"Linhas Classificadas" = Table.Sort(#"Linhas Filtradas1",{{"Fornecedor", Order.Ascending}})
+    #"Linhas Classificadas" = Table.Sort(#"Linhas Filtradas1",{{"Fornecedor", Order.Ascending}}),
+    #"Tipo Alterado2" = Table.TransformColumnTypes(#"Linhas Classificadas",{{"Percentagem de desconto por Unidade", type number}})
 in
-    #"Linhas Classificadas"
+    #"Tipo Alterado2"

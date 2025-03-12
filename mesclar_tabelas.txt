@@ -6,6 +6,8 @@ let
     #"Colunas Renomeadas" = Table.RenameColumns(#"Outras Colunas Não Dinâmicas",{{"Atributo", "Orçamento"}, {"Nome do Item", "Nome do item"}}),
 
     #"Consultas Mescladas" = Table.NestedJoin(Fonte, {"Nome do item"}, #"Colunas Renomeadas", {"Nome do item"}, "Itens", JoinKind.LeftOuter),
-    #"Itens Expandido" = Table.ExpandTableColumn(#"Consultas Mescladas", "Itens", {"Orçamento", "Valor"}, {"Orçamento", "Valor"})
+    #"Itens Expandido" = Table.ExpandTableColumn(#"Consultas Mescladas", "Itens", {"Orçamento", "Valor"}, {"Orçamento", "Valor"}),
+    #"Valor Substituído" = Table.ReplaceValue(#"Itens Expandido",null,0,Replacer.ReplaceValue,{"Percentagem de desconto por Unidade"}),
+    Personalizar1 = Table.ReplaceValue(#"Valor Substituído",null,0,Replacer.ReplaceValue,{"Custos adicionais"})
 in
-    #"Itens Expandido"
+    Personalizar1

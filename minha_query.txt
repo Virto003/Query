@@ -46,6 +46,8 @@ Table.PromoteHeaders(
     #"Linhas Filtradas1" = Table.SelectRows(#"Itens Expandido", each ([#"Valor impacto/saving"] <> "(Preço Base - Orçamento x quantidade)") and ([Número do material] <> null)),
     #"Valor Substituído1" = Table.ReplaceValue(#"Linhas Filtradas1",null,"0",Replacer.ReplaceValue,{"Percentagem de desconto por Unidade"}),
     #"Valor Substituído2" = Table.ReplaceValue(#"Valor Substituído1",null,0,Replacer.ReplaceValue,{"Custos adicionais"}),
-    #"Tipo Alterado2" = Table.TransformColumnTypes(#"Valor Substituído2",{{"Percentagem de desconto por Unidade", type number}, {"Rappel", type number}})
+    #"Valor Substituído3" = Table.ReplaceValue(#"Valor Substituído2",null,0,Replacer.ReplaceValue,{"Preço orçamento"}),
+    #"Valor Substituído4" = Table.ReplaceValue(#"Valor Substituído3",null,0,Replacer.ReplaceValue,{"Rappel"}),
+    #"Tipo Alterado2" = Table.TransformColumnTypes(#"Valor Substituído4",{{"Percentagem de desconto por Unidade", type number}, {"Rappel", type number}})
 in
     #"Tipo Alterado2"

@@ -45,6 +45,7 @@ Table.PromoteHeaders(
     #"Itens Expandido" = Table.ExpandTableColumn(#"Consultas Mescladas", "Itens", {"Nome do item"}, {"Nome do item"}),
     #"Linhas Filtradas1" = Table.SelectRows(#"Itens Expandido", each ([#"Valor impacto/saving"] <> "(Preço Base - Orçamento x quantidade)") and ([Número do material] <> null)),
     #"Valor Substituído1" = Table.ReplaceValue(#"Linhas Filtradas1",null,"0",Replacer.ReplaceValue,{"Percentagem de desconto por Unidade"}),
-    #"Valor Substituído2" = Table.ReplaceValue(#"Valor Substituído1",null,0,Replacer.ReplaceValue,{"Custos adicionais"})
+    #"Valor Substituído2" = Table.ReplaceValue(#"Valor Substituído1",null,0,Replacer.ReplaceValue,{"Custos adicionais"}),
+    #"Tipo Alterado2" = Table.TransformColumnTypes(#"Valor Substituído2",{{"Percentagem de desconto por Unidade", type number}, {"Rappel", type number}})
 in
-    #"Valor Substituído2"
+    #"Tipo Alterado2"

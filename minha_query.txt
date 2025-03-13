@@ -7,7 +7,7 @@ let
     #"Tabela Transposta" = Table.Transpose(#"Colunas Removidas"),
     #"Valor Substituído" = Table.TransformColumns(#"Tabela Transposta", {{"Column1", each if Text.StartsWith(_, "Coluna") then null else _, type text}}),
     #"Cabeçalhos Promovidos1" = Table.PromoteHeaders(#"Valor Substituído", [PromoteAllScalars=true]),
-    #"Colunas Renomeadas2" = Table.RenameColumns(#"Cabeçalhos Promovidos1",{{Table.ColumnNames(#"Cabeçalhos Promovidos1"){0}, "Column1"}}),
+    #"Colunas Renomeadas2" = Table.RenameColumns(#"Cabeçalhos Promovidos1",{{Table.ColumnNames(#"Cabeçalhos Promovidos1"){0}, "Column1"}, {Table.ColumnNames(#"Cabeçalhos Promovidos1"){1}, "Column2"}}),
     #"Linhas Filtradas" = Table.SelectRows(#"Colunas Renomeadas2", each ([Column2] <> null)),
     #"Preenchido Abaixo" = Table.FillDown(#"Linhas Filtradas",{"Column1"}),
     // Agrupar por fornecedor e transpor os dados
@@ -34,7 +34,7 @@ Table.PromoteHeaders(
     // Carregar a tabela de itens
     FonteItens = Excel.CurrentWorkbook(){[Name="Tabela1"]}[Content],
     #"Cabeçalhos Promovidos" = Table.PromoteHeaders(FonteItens, [PromoteAllScalars=true]),
-    #"Outras Colunas Removidas" = Table.SelectColumns(#"Cabeçalhos Promovidos",{"Column1", "Column2", "Número do material"}),
+    #"Outras Colunas Removidas" = Table.SelectColumns(#"Cabeçalhos Promovidos",{Table.ColumnNames(#"Cabeçalhos Promovidos"){0}, Table.ColumnNames(#"Cabeçalhos Promovidos"){1}, "Número do material"}),
     #"Colunas Renomeadas3" = Table.RenameColumns(#"Outras Colunas Removidas",{{Table.ColumnNames(#"Outras Colunas Removidas"){0}, "Número"}, {Table.ColumnNames(#"Outras Colunas Removidas"){1}, "Nome do item"}}),
     #"Linhas Filtradas3" = Table.SelectRows(#"Colunas Renomeadas3", each [Número do material] <> null),
     #"Duplicatas Removidas" = Table.Distinct(#"Linhas Filtradas3", {"Número do material"}),
@@ -44,7 +44,7 @@ Table.PromoteHeaders(
     #"Consultas Mescladas" = Table.NestedJoin(#"Tipo Alterado", {"Número do material"}, #"Tipo Alterado1", {"Número do material"}, "Itens", JoinKind.LeftOuter),
     #"Itens Expandido" = Table.ExpandTableColumn(#"Consultas Mescladas", "Itens", {"Nome do item"}, {"Nome do item"}),
     #"Linhas Filtradas1" = Table.SelectRows(#"Itens Expandido", each ([#"Valor impacto/saving"] <> "(Preço Base - Orçamento x quantidade)") and ([Número do material] <> null)),
-    #"Linhas Classificadas" = Table.Sort(#"Linhas Filtradas1",{{"Fornecedor", Order.Ascending}}),
-    #"Tipo Alterado2" = Table.TransformColumnTypes(#"Linhas Classificadas",{{"Percentagem de desconto por Unidade", type number}})
+    #"Valor Substituído1" = Table.ReplaceValue(#"Linhas Filtradas1",null,"0",Replacer.ReplaceValue,{"Percentagem de desconto por Unidade"}),
+    #"Valor Substituído2" = Table.ReplaceValue(#"Valor Substituído1",null,0,Replacer.ReplaceValue,{"Custos adicionais"})
 in
-    #"Tipo Alterado2"
+    #"Valor Substituído2"

@@ -48,6 +48,7 @@ Table.PromoteHeaders(
     #"Valor Substituído2" = Table.ReplaceValue(#"Valor Substituído1",null,0,Replacer.ReplaceValue,{"Custos adicionais por unidade"}),
     #"Valor Substituído3" = Table.ReplaceValue(#"Valor Substituído2",null,0,Replacer.ReplaceValue,{"Preço orçamento"}),
     #"Valor Substituído4" = Table.ReplaceValue(#"Valor Substituído3",null,0,Replacer.ReplaceValue,{"Rappel"}),
-    #"Tipo Alterado2" = Table.TransformColumnTypes(#"Valor Substituído4",{{"Percentagem de desconto por Unidade", type number}, {"Rappel", type number}})
+    #"Tipo Alterado2" = Table.TransformColumnTypes(#"Valor Substituído4",{{"Percentagem de desconto por Unidade", type number}, {"Rappel", type number}}),
+    #"Duplicatas Removidas1" = Table.Distinct(#"Tipo Alterado2", {"Fornecedor", "Preço base", "Quantidade", "UM", "Unidade de venda", "Incoterm", "Caso pretenda outro incoterm, indique qual.", "Preço estendido", "Percentagem de desconto por Unidade", "Custos adicionais por unidade", "Outras despesas por unidade", "Preço base unitário - percentagem desconto -rappel + custos adicionais + outros ", "Custo total", "% de diferença savings", "Valor impacto/saving", "Preço orçamento", "Preço última compra", "Rappel", "Descrição", "MOQ", "UM MOQ", "Origem/Produtor", "Prazo de entrega (em dias)", "Período de Fornecimento", "Embalagem Retornável (SIM/NÃO)", "Notas", "Categoria do item", "Número do material", "Grupo de materiais", "Tipo do material", "Nome do item"})
 in
-    #"Tipo Alterado2"
+    #"Duplicatas Removidas1"

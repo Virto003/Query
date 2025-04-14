@@ -49,6 +49,8 @@ Table.PromoteHeaders(
     #"Valor Substituído3" = Table.ReplaceValue(#"Valor Substituído2",null,0,Replacer.ReplaceValue,{"Preço orçamento"}),
     #"Valor Substituído4" = Table.ReplaceValue(#"Valor Substituído3",null,0,Replacer.ReplaceValue,{"Rappel"}),
     #"Tipo Alterado2" = Table.TransformColumnTypes(#"Valor Substituído4",{{"Percentagem de desconto por Unidade", type number}, {"Rappel", type number}}),
-    #"Colunas Renomeadas4" = Table.RenameColumns(#"Tipo Alterado2",{{"Valor impacto/saving#(lf)(Preço Base - Orçamento x quantidade)", "Valor impacto/saving(Preço Base - Orçamento x quantidade)"}, {"% de diferença savings#(lf)(Preço Base - Preço Orçamento)", "% de diferença savings(Preço Base - Preço Orçamento)"}})
+    #"Colunas Renomeadas4" = Table.RenameColumns(#"Tipo Alterado2",{{"Valor impacto/saving#(lf)(Preço Base - Orçamento x quantidade)", "Valor impacto/saving(Preço Base - Orçamento x quantidade)"}, {"% de diferença savings#(lf)(Preço Base - Preço Orçamento)", "% de diferença savings(Preço Base - Preço Orçamento)"}}),
+    #"Tipo Alterado3" = Table.TransformColumnTypes(#"Colunas Renomeadas4",{{"% de diferença savings(Preço Base - Preço Orçamento)", Percentage.Type}}),
+    #"Coluna dividida" = Table.TransformColumns(#"Tipo Alterado3", {{"% de diferença savings(Preço Base - Preço Orçamento)", each _ / 100, Percentage.Type}})
 in
-    #"Colunas Renomeadas4"
+    #"Coluna dividida"
